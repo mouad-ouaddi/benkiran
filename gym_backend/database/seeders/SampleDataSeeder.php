@@ -106,33 +106,49 @@ class SampleDataSeeder extends Seeder
 
         foreach ($abonnements as $abonnement) {
             DB::table('abonnements')->insert($abonnement);
-        }
-
-        // Create cours
+        }        // Create cours
         $cours = [
             [
                 'nom' => 'Musculation Débutant',
                 'description' => 'Cours de musculation pour débutants',
                 'type' => 'Musculation',
-                'coach_id' => 1
+                'coach_id' => 1,
+                'planning_id' => null
             ],
             [
                 'nom' => 'Cardio Training',
                 'description' => 'Séance de cardio intensif',
                 'type' => 'Cardio',
-                'coach_id' => 1
+                'coach_id' => 1,
+                'planning_id' => null
             ],
             [
                 'nom' => 'Yoga Détente',
                 'description' => 'Séance de yoga relaxante',
                 'type' => 'Yoga',
-                'coach_id' => 2
+                'coach_id' => 2,
+                'planning_id' => null
             ],
             [
                 'nom' => 'Cross Training',
                 'description' => 'Entraînement croisé haute intensité',
-                'type' => 'Autre',
-                'coach_id' => 2
+                'type' => 'Cross Training',
+                'coach_id' => 2,
+                'planning_id' => null
+            ],
+            [
+                'nom' => 'Pilates',
+                'description' => 'Cours de pilates pour renforcer le core',
+                'type' => 'Pilates',
+                'coach_id' => 1,
+                'planning_id' => null
+            ],
+            [
+                'nom' => 'Zumba',
+                'description' => 'Cours de danse fitness énergique',
+                'type' => 'Zumba',
+                'coach_id' => 2,
+                'planning_id' => null
             ]
         ];
 
@@ -143,33 +159,65 @@ class SampleDataSeeder extends Seeder
         // Create plannings for this week
         $today = Carbon::now();
         $startOfWeek = $today->copy()->startOfWeek();
+        $planningIds = [];
         
         for ($day = 0; $day < 7; $day++) {
             $currentDay = $startOfWeek->copy()->addDays($day);
             
-            // Morning sessions
-            DB::table('plannings')->insert([
-                'cours_id' => rand(1, 4),
+            // Morning sessions (9:00, 10:00)
+            $planningId1 = DB::table('plannings')->insertGetId([
                 'date_heure' => $currentDay->copy()->setTime(9, 0),
                 'duree' => 60,
                 'capacite' => 15
             ]);
+            $planningIds[] = $planningId1;
             
-            // Afternoon sessions
-            DB::table('plannings')->insert([
-                'cours_id' => rand(1, 4),
+            $planningId2 = DB::table('plannings')->insertGetId([
+                'date_heure' => $currentDay->copy()->setTime(10, 0),
+                'duree' => 60,
+                'capacite' => 12
+            ]);
+            $planningIds[] = $planningId2;
+            
+            // Afternoon sessions (14:00, 15:00)
+            $planningId3 = DB::table('plannings')->insertGetId([
                 'date_heure' => $currentDay->copy()->setTime(14, 0),
                 'duree' => 60,
                 'capacite' => 12
             ]);
+            $planningIds[] = $planningId3;
             
-            // Evening sessions
-            DB::table('plannings')->insert([
-                'cours_id' => rand(1, 4),
+            $planningId4 = DB::table('plannings')->insertGetId([
+                'date_heure' => $currentDay->copy()->setTime(15, 0),
+                'duree' => 60,
+                'capacite' => 18
+            ]);
+            $planningIds[] = $planningId4;
+            
+            // Evening sessions (18:00, 19:00)
+            $planningId5 = DB::table('plannings')->insertGetId([
                 'date_heure' => $currentDay->copy()->setTime(18, 0),
                 'duree' => 90,
                 'capacite' => 20
             ]);
+            $planningIds[] = $planningId5;
+            
+            $planningId6 = DB::table('plannings')->insertGetId([
+                'date_heure' => $currentDay->copy()->setTime(19, 0),
+                'duree' => 60,
+                'capacite' => 16
+            ]);
+            $planningIds[] = $planningId6;
+        }
+
+        // Assign some courses to planning sessions
+        $coursIds = [1, 2, 3, 4, 5, 6];
+        $assignedPlannings = array_slice($planningIds, 0, 6); // Assign 6 courses to first 6 planning slots
+        
+        for ($i = 0; $i < 6; $i++) {
+            DB::table('cours')
+                ->where('id', $coursIds[$i])
+                ->update(['planning_id' => $assignedPlannings[$i]]);
         }
 
         // Create inscriptions

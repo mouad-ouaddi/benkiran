@@ -10,9 +10,7 @@ class Planning extends Model
     use HasFactory;
 
     protected $table = 'plannings';
-    
-    protected $fillable = [
-        'cours_id',
+      protected $fillable = [
         'date_heure',
         'duree',
         'capacite'
@@ -22,11 +20,9 @@ class Planning extends Model
         'date_heure' => 'datetime',
         'duree' => 'integer',
         'capacite' => 'integer'
-    ];
-
-    public function cours()
+    ];    public function cours()
     {
-        return $this->belongsTo(Cours::class, 'cours_id');
+        return $this->hasOne(Cours::class, 'planning_id');
     }
 
     public function reservations()

@@ -10,21 +10,19 @@ class Cours extends Model
     use HasFactory;
 
     protected $table = 'cours';
-    
-    protected $fillable = [
+      protected $fillable = [
         'nom',
         'description',
         'type',
-        'coach_id'
+        'coach_id',
+        'planning_id'
     ];
 
     public function coach()
     {
         return $this->belongsTo(Coach::class, 'coach_id');
-    }
-
-    public function plannings()
+    }    public function planning()
     {
-        return $this->hasMany(Planning::class, 'cours_id');
+        return $this->belongsTo(Planning::class, 'planning_id');
     }
 }
