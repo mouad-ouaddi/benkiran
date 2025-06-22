@@ -19,7 +19,7 @@ const CoachManagement = ({ onNavigate }) => {
     email: '',
     mot_de_passe: '',
     role: 'coach',
-    specialite: 'fitness',
+    specialite: '',
     experience: ''
   });
 

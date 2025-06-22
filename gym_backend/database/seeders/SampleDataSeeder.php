@@ -246,12 +246,48 @@ class SampleDataSeeder extends Seeder
             
             foreach ($selectedPlannings as $planning) {
                 DB::table('reservations')->insert([
-                    'adherent_id' => $adherent->id,
-                    'planning_id' => $planning->id,
+                    'adherent_id' => $adherent->id,                    'planning_id' => $planning->id,
                     'statut' => rand(1, 100) <= 90 ? 'réservé' : 'annulé',
                     'date_reservation' => Carbon::now()->subDays(rand(1, 7))
                 ]);
             }
+        }
+
+        // Add sample reports
+        $reportTitles = [
+            'Équipement défectueux',
+            'Problème avec mon abonnement',
+            'Vestiaires sales',
+            'Suggestion pour de nouveaux cours',
+            'Coach en retard'
+        ];
+
+        $reportContents = [
+            'J\'ai remarqué que l\'équipement X est défectueux depuis plusieurs jours. Pourriez-vous le réparer s\'il vous plaît ?',
+            'Mon abonnement ne fonctionne pas correctement dans l\'application. Je ne peux pas réserver de cours.',
+            'Les vestiaires étaient dans un état déplorable ce matin. Il y avait des serviettes partout et les douches n\'étaient pas propres.',
+            'J\'aimerais suggérer des cours de yoga le week-end. Je pense que beaucoup de membres seraient intéressés.',
+            'Le coach était en retard de 15 minutes hier pour le cours de 18h. C\'est la deuxième fois cette semaine.'
+        ];
+
+        // Get adherent IDs
+        $adherentIds = DB::table('adherents')
+            ->join('utilisateurs', 'adherents.utilisateur_id', '=', 'utilisateurs.id')
+            ->pluck('utilisateurs.id')
+            ->toArray();
+
+        // Create reports
+        for ($i = 0; $i < count($reportTitles); $i++) {
+            $userId = $adherentIds[array_rand($adherentIds)];
+            $hasResponse = rand(0, 1);
+            
+            DB::table('reports')->insert([
+                'titre' => $reportTitles[$i],
+                'utilisateur_id' => $userId,
+                'contenu' => $reportContents[$i],
+                'reponse' => $hasResponse ? 'Merci pour votre signalement. Nous avons pris note de votre demande et allons nous en occuper rapidement.' : null,
+                'created_at' => Carbon::now()->subDays(rand(1, 14))
+            ]);
         }
     }
 }

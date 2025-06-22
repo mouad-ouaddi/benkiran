@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import UserManagement from './UserManagement';
 import CoachManagement from './CoachManagement';
 import AbonnementsPage from './AbonnementsPage';
-import WeeklyPlanning from '../WeeklyPlanning';
-import CourseManagement from '../CourseManagement';
-import './Dashboard.css';
+import CoursPage from './CoursPage';
+import './AdminDashboard.css';
+import AdminReports from './AdminReports';
 
 const AdminDashboard = ({ onLogout }) => {
   const navigate = useNavigate();
@@ -14,7 +14,7 @@ const AdminDashboard = ({ onLogout }) => {
   const [stats, setStats] = useState({
     totalAdherents: 0,
     coursThisWeek: 0,
-    monthlyRevenue: '0.00',
+    monthlyRevenue: '0',
     occupationRate: 0
   });
   const [loading, setLoading] = useState(true);
@@ -69,12 +69,10 @@ const AdminDashboard = ({ onLogout }) => {
         return <CoachManagement onNavigate={handleNavigation} />;
       case 'subscriptions':
         return <AbonnementsPage onNavigate={handleNavigation} />;
-      case 'planning':
-        return <WeeklyPlanning onNavigate={handleNavigation} />;
-      case 'courses':
-        return <CourseManagement onNavigate={handleNavigation} />;
+      case 'cours':
+        return <CoursPage onNavigate={handleNavigation} />;
       case 'reporting':
-        return <div>Reporting (À implémenter)</div>;
+        return <AdminReports onNavigate={handleNavigation} />;
       default:
         return renderDashboardContent();
     }
@@ -130,15 +128,9 @@ const AdminDashboard = ({ onLogout }) => {
               onClick={() => handleNavigation('users')}
             >
               ➕ Nouvel Adhérent
-            </button>            <button 
+            </button>              <button 
               className="action-btn secondary"
-              onClick={() => handleNavigation('planning')}
-            >
-              📅 Planifier Semaine
-            </button>
-            <button 
-              className="action-btn secondary"
-              onClick={() => handleNavigation('courses')}
+              onClick={() => handleNavigation('cours')}
             >
               🏋️ Gérer Cours
             </button>
@@ -178,65 +170,65 @@ const AdminDashboard = ({ onLogout }) => {
             </div>
           </div>
         </div>
-        
-        <nav className="nav-menu">          <a 
-            href="#" 
-            className={`nav-item ${currentView === 'dashboard' ? 'active' : ''}`}
-            onClick={(e) => { e.preventDefault(); handleNavigation('dashboard'); }}
-          >
-            📊 Dashboard
-          </a><a 
-            href="#" 
-            className={`nav-item ${currentView === 'users' ? 'active' : ''}`}
-            onClick={(e) => { e.preventDefault(); handleNavigation('users'); }}
-          >
-            🏃‍♂️ Gestion des Adhérents
-          </a>
-          <a 
-            href="#" 
-            className={`nav-item ${currentView === 'coaches' ? 'active' : ''}`}
-            onClick={(e) => { e.preventDefault(); handleNavigation('coaches'); }}
-          >
-            💪 Gestion des Coaches
-          </a>          <a 
-            href="#" 
-            className={`nav-item ${currentView === 'subscriptions' ? 'active' : ''}`}
-            onClick={(e) => { e.preventDefault(); handleNavigation('subscriptions'); }}
-          >
-            🎫 Les Abonnements
-          </a>          <a 
-            href="#" 
-            className={`nav-item ${currentView === 'planning' ? 'active' : ''}`}
-            onClick={(e) => { e.preventDefault(); handleNavigation('planning'); }}
-          >
-            🗓️ Planning Semaine
-          </a>
-          <a 
-            href="#" 
-            className={`nav-item ${currentView === 'courses' ? 'active' : ''}`}
-            onClick={(e) => { e.preventDefault(); handleNavigation('courses'); }}
-          >
-            🏋️ Gestion des Cours
-          </a>
-          <a 
-            href="#" 
-            className={`nav-item ${currentView === 'reporting' ? 'active' : ''}`}
-            onClick={(e) => { e.preventDefault(); handleNavigation('reporting'); }}
-          >
-            📈 Reporting
-          </a>
+          <nav className="nav-menu">
+          <div className="nav-main">
+            <a 
+              href="#" 
+              className={`nav-item ${currentView === 'dashboard' ? 'active' : ''}`}
+              onClick={(e) => { e.preventDefault(); handleNavigation('dashboard'); }}
+            >
+              📊 Dashboard
+            </a>
+            <a 
+              href="#" 
+              className={`nav-item ${currentView === 'users' ? 'active' : ''}`}
+              onClick={(e) => { e.preventDefault(); handleNavigation('users'); }}
+            >
+              🏃‍♂️ Gestion des Adhérents
+            </a>
+            <a 
+              href="#" 
+              className={`nav-item ${currentView === 'coaches' ? 'active' : ''}`}
+              onClick={(e) => { e.preventDefault(); handleNavigation('coaches'); }}
+            >
+              💪 Gestion des Coaches
+            </a>
+            <a 
+              href="#" 
+              className={`nav-item ${currentView === 'subscriptions' ? 'active' : ''}`}
+              onClick={(e) => { e.preventDefault(); handleNavigation('subscriptions'); }}
+            >
+              🎫 Les Abonnements
+            </a>
+            <a 
+              href="#" 
+              className={`nav-item ${currentView === 'cours' ? 'active' : ''}`}
+              onClick={(e) => { e.preventDefault(); handleNavigation('cours'); }}
+            >
+              🏋️ Gestion des Cours
+            </a>
+            <a 
+              href="#" 
+              className={`nav-item ${currentView === 'reporting' ? 'active' : ''}`}
+              onClick={(e) => { e.preventDefault(); handleNavigation('reporting'); }}
+            >
+              📈 Reporting
+            </a>
+          </div>
+          <div className="nav-bottom">
+            <a 
+              href="#" 
+              className="nav-item logout-btn"
+              onClick={(e) => { e.preventDefault(); handleLogout(); }}
+            >
+              🚪 Déconnexion
+            </a>
+          </div>
         </nav>
       </div>
 
       {/* Main Content */}
       <div className="dashboard-main">
-        <header className="dashboard-header">
-          <h1>Dashboard Administrateur</h1>
-          <div className="header-actions">
-            <button onClick={handleLogout} className="logout-btn">Déconnexion</button>
-          </div>
-        </header>
-
         {renderCurrentView()}
       </div>
     </div>

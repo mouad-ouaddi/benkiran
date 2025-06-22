@@ -60,6 +60,8 @@ CREATE TABLE cours (
     description TEXT,
     type VARCHAR(255) NOT NULL,
     coach_id INT NOT NULL,
+    date_debut datetime not null,
+    duree int not null,
     planning_id INT NOT NULL, -- each cours is linked to one planning
     FOREIGN KEY (coach_id) REFERENCES coachs(id) ON DELETE CASCADE,
     FOREIGN KEY (planning_id) REFERENCES plannings(id) ON DELETE CASCADE
@@ -74,4 +76,14 @@ CREATE TABLE reservations (
     date_reservation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (adherent_id) REFERENCES adherents(id) ON DELETE CASCADE,
     FOREIGN KEY (planning_id) REFERENCES plannings(id) ON DELETE CASCADE
+);
+
+CREATE TABLE reports (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    titre VARCHAR(255) NOT NULL,
+    utilisateur_id INT NOT NULL,
+    contenu TEXT NOT NULL,
+    reponse TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (utilisateur_id) REFERENCES utilisateurs(id) ON DELETE CASCADE
 );

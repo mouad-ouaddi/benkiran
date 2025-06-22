@@ -110,25 +110,7 @@ const Login = ({ onLogin }) => {
           </button>
         </form>
 
-        <div className="login-footer">
-          <div className="role-info">
-            <h3>Types d'utilisateurs:</h3>
-            <div className="roles">
-              <div className="role">
-                <span className="role-badge admin">Admin</span>
-                <p>Gestion complète du système</p>
-              </div>
-              <div className="role">
-                <span className="role-badge coach">Coach</span>
-                <p>Gestion des cours et planning</p>
-              </div>
-              <div className="role">
-                <span className="role-badge adherent">Adhérent</span>
-                <p>Réservation et suivi personnel</p>
-              </div>
-            </div>
-          </div>
-        </div>
+        
       </div>
     </div>
   );

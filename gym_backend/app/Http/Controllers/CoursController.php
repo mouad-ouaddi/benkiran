@@ -5,184 +5,170 @@ namespace App\Http\Controllers;
 use App\Models\Cours;
 use App\Models\Coach;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CoursController extends Controller
 {
     /**
-     * Get all courses
+     * Display a listing of the courses.
      */
     public function index()
     {
-        try {
-            $cours = Cours::with(['coach.utilisateur', 'planning'])->get();
-
-            $formattedCours = $cours->map(function ($cours) {
-                return [
-                    'id' => $cours->id,
-                    'nom' => $cours->nom,
-                    'type' => $cours->type,
-                    'description' => $cours->description,
-                    'coach_name' => $cours->coach ? ($cours->coach->utilisateur->prenom . ' ' . $cours->coach->utilisateur->nom) : 'No coach assigned',
-                    'coach_specialite' => $cours->coach ? $cours->coach->specialite : null,
-                    'coach_id' => $cours->coach_id,
-                    'planning_id' => $cours->planning_id,
-                    'has_planning' => $cours->planning_id ? true : false
-                ];
-            });
+        try {            $cours = Cours::with(['coach.utilisateur'])
+                ->orderBy('date_debut', 'desc')
+                ->get();
 
             return response()->json([
                 'success' => true,
-                'data' => $formattedCours
+                'data' => $cours
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error retrieving courses: ' . $e->getMessage()
+                'message' => 'Erreur lors de la récupération des cours',
+                'error' => $e->getMessage()
             ], 500);
         }
     }
 
     /**
-     * Create a new course
-     */
-    public function store(Request $request)
+     * Store a newly created course in storage.
+     */    public function store(Request $request)
     {
+        $request->validate([
+            'nom' => 'required|string|max:100',
+            'description' => 'nullable|string',
+            'type' => 'required|string|max:255',
+            'coach_id' => 'required|exists:coachs,id',
+            'date_debut' => 'required|date',
+            'duree' => 'required|integer|min:1'
+        ]);
+
         try {
-            $validated = $request->validate([
-                'nom' => 'required|string|max:100',
-                'description' => 'nullable|string',
-                'type' => 'required|string|max:255',
-                'coach_id' => 'required|exists:coachs,id'
+            $cours = Cours::create([
+                'nom' => $request->nom,
+                'description' => $request->description,
+                'type' => $request->type,
+                'coach_id' => $request->coach_id,
+                'date_debut' => $request->date_debut,
+                'duree' => $request->duree
             ]);
 
-            $cours = Cours::create($validated);
             $cours->load(['coach.utilisateur']);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Course created successfully',
+                'message' => 'Cours créé avec succès',
                 'data' => $cours
             ], 201);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error creating course: ' . $e->getMessage()
+                'message' => 'Erreur lors de la création du cours',
+                'error' => $e->getMessage()
             ], 500);
         }
     }
 
     /**
-     * Get a specific course
-     */
-    public function show($id)
+     * Display the specified course.
+     */    public function show($id)
     {
         try {
-            $cours = Cours::with(['coach.utilisateur', 'planning'])->findOrFail($id);
+            $cours = Cours::with(['coach.utilisateur'])->findOrFail($id);
 
             return response()->json([
                 'success' => true,
                 'data' => $cours
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Course not found: ' . $e->getMessage()
+                'message' => 'Cours non trouvé',
+                'error' => $e->getMessage()
             ], 404);
         }
     }
 
     /**
-     * Update a course
-     */
-    public function update(Request $request, $id)
+     * Update the specified course in storage.
+     */    public function update(Request $request, $id)
     {
+        $request->validate([
+            'nom' => 'required|string|max:100',
+            'description' => 'nullable|string',
+            'type' => 'required|string|max:255',
+            'coach_id' => 'required|exists:coachs,id',
+            'date_debut' => 'required|date',
+            'duree' => 'required|integer|min:1'
+        ]);
+
         try {
             $cours = Cours::findOrFail($id);
-
-            $validated = $request->validate([
-                'nom' => 'sometimes|string|max:100',
-                'description' => 'sometimes|nullable|string',
-                'type' => 'sometimes|string|max:255',
-                'coach_id' => 'sometimes|exists:coachs,id'
+            
+            $cours->update([
+                'nom' => $request->nom,
+                'description' => $request->description,
+                'type' => $request->type,
+                'coach_id' => $request->coach_id,
+                'date_debut' => $request->date_debut,
+                'duree' => $request->duree
             ]);
 
-            $cours->update($validated);
             $cours->load(['coach.utilisateur']);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Course updated successfully',
+                'message' => 'Cours mis à jour avec succès',
                 'data' => $cours
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error updating course: ' . $e->getMessage()
+                'message' => 'Erreur lors de la mise à jour du cours',
+                'error' => $e->getMessage()
             ], 500);
         }
     }
 
     /**
-     * Delete a course
+     * Remove the specified course from storage.
      */
     public function destroy($id)
     {
         try {
             $cours = Cours::findOrFail($id);
-
-            // Check if course is assigned to any planning
-            if ($cours->planning_id) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Cannot delete course that is assigned to a planning session'
-                ], 422);
-            }
-
             $cours->delete();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Course deleted successfully'
+                'message' => 'Cours supprimé avec succès'
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error deleting course: ' . $e->getMessage()
+                'message' => 'Erreur lors de la suppression du cours',
+                'error' => $e->getMessage()
             ], 500);
         }
     }
 
     /**
-     * Get available coaches for courses
+     * Get all coaches for dropdown selection.
      */
-    public function getAvailableCoaches()
+    public function getCoachs()
     {
         try {
-            $coaches = Coach::with('utilisateur')->get();
-
-            $formattedCoaches = $coaches->map(function ($coach) {
-                return [
-                    'id' => $coach->id,
-                    'name' => $coach->utilisateur->prenom . ' ' . $coach->utilisateur->nom,
-                    'specialite' => $coach->specialite,
-                    'experience' => $coach->experience
-                ];
-            });
+            $coachs = Coach::with('utilisateur')->get();
 
             return response()->json([
                 'success' => true,
-                'data' => $formattedCoaches
+                'data' => $coachs
             ]);
-
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error retrieving coaches: ' . $e->getMessage()
+            return response()->json([                'success' => false,
+                'message' => 'Erreur lors de la récupération des coachs',
+                'error' => $e->getMessage()
             ], 500);
         }
     }

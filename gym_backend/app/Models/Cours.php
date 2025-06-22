@@ -10,19 +10,23 @@ class Cours extends Model
     use HasFactory;
 
     protected $table = 'cours';
+    
+    // Disable Laravel's automatic timestamps
+    public $timestamps = false;
       protected $fillable = [
         'nom',
         'description',
         'type',
         'coach_id',
-        'planning_id'
+        'date_debut',
+        'duree'
     ];
 
-    public function coach()
+    protected $casts = [
+        'date_debut' => 'datetime',
+        'duree' => 'integer'
+    ];    public function coach()
     {
         return $this->belongsTo(Coach::class, 'coach_id');
-    }    public function planning()
-    {
-        return $this->belongsTo(Planning::class, 'planning_id');
     }
 }
