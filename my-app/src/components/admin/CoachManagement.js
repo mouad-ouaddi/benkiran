@@ -244,7 +244,7 @@ const CoachManagement = ({ onNavigate }) => {
   };
 
   if (loading) {
-    return <div className="loading">Loading...</div>;
+    return <div className="loading">Chargement...</div>;
   }
 
   return (

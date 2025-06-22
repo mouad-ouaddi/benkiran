@@ -29,7 +29,7 @@ const AdminReports = () => {
       setLoading(false);
     } catch (error) {
       console.error('Error fetching reports:', error);
-      setError('Failed to load reports. Please try again later.');
+      setError('Échec du chargement des rapports. Veuillez réessayer plus tard.');
       setLoading(false);
     }
   };
@@ -46,7 +46,7 @@ const AdminReports = () => {
 
   const submitResponse = async () => {
     if (!response.trim()) {
-      alert('Please enter a response before submitting.');
+      alert('Veuillez saisir une réponse avant de soumettre.');
       return;
     }
 
@@ -80,12 +80,12 @@ const AdminReports = () => {
       }, 2000);
     } catch (error) {
       console.error('Error submitting response:', error);
-      alert('Failed to submit response. Please try again.');
+      alert('Échec de l\'envoi de la réponse. Veuillez réessayer.');
     }
   };
 
   const deleteReport = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this report?')) {
+    if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce rapport ?')) {
       return;
     }
 
@@ -106,12 +106,12 @@ const AdminReports = () => {
       }
     } catch (error) {
       console.error('Error deleting report:', error);
-      alert('Failed to delete report. Please try again.');
+      alert('Échec de la suppression du rapport. Veuillez réessayer.');
     }
   };
 
   if (loading) {
-    return <div className="admin-reports-container loading">Loading reports...</div>;
+    return <div className="admin-reports-container loading">Chargement des rapports...</div>;
   }
 
   if (error) {
@@ -119,14 +119,13 @@ const AdminReports = () => {
   }
 
   return (
-    <div className="admin-reports-container">
-      <h2>Reports Management</h2>
+    <div className="admin-reports-container">      <h2>Gestion des Rapports</h2>
       
       <div className="reports-layout">
         <div className="reports-list">
-          <h3>All Reports</h3>
+          <h3>Tous les Rapports</h3>
           {reports.length === 0 ? (
-            <p>No reports available.</p>
+            <p>Aucun rapport disponible.</p>
           ) : (
             <ul>
               {reports.map(report => (
@@ -136,13 +135,12 @@ const AdminReports = () => {
                   onClick={() => handleSelectReport(report)}
                 >
                   <div className="report-header">
-                    <span className="report-title">{report.titre}</span>
-                    <span className="report-status">
-                      {report.reponse ? 'Responded' : 'Pending'}
+                    <span className="report-title">{report.titre}</span>                    <span className="report-status">
+                      {report.reponse ? 'Répondu' : 'En attente'}
                     </span>
                   </div>
                   <div className="report-meta">
-                    <span>By: {report.utilisateur ? `${report.utilisateur.nom} ${report.utilisateur.prenom}` : 'Unknown'}</span>
+                    <span>Par: {report.utilisateur ? `${report.utilisateur.nom} ${report.utilisateur.prenom}` : 'Inconnu'}</span>
                     <span>{new Date(report.created_at).toLocaleDateString()}</span>
                   </div>
                 </li>
@@ -155,55 +153,54 @@ const AdminReports = () => {
           {selectedReport ? (
             <>
               <div className="report-detail-header">
-                <h3>{selectedReport.titre}</h3>
-                <button 
+                <h3>{selectedReport.titre}</h3>                <button 
                   className="delete-button" 
                   onClick={() => deleteReport(selectedReport.id)}
                 >
-                  Delete
+                  Supprimer
                 </button>
               </div>
               
               <div className="report-user-info">
                 <p>
-                  <strong>Reported by:</strong> {selectedReport.utilisateur 
+                  <strong>Signalé par:</strong> {selectedReport.utilisateur 
                     ? `${selectedReport.utilisateur.nom} ${selectedReport.utilisateur.prenom} (${selectedReport.utilisateur.email})` 
-                    : 'Unknown'}
+                    : 'Inconnu'}
                 </p>
                 <p><strong>Date:</strong> {new Date(selectedReport.created_at).toLocaleString()}</p>
               </div>
               
               <div className="report-content">
-                <h4>Report Content:</h4>
+                <h4>Contenu du Rapport:</h4>
                 <p>{selectedReport.contenu}</p>
               </div>
               
               <div className="admin-response">
-                <h4>Admin Response:</h4>
+                <h4>Réponse de l'Administrateur:</h4>
                 <textarea 
                   value={response} 
                   onChange={handleResponseChange}
-                  placeholder="Enter your response here..."
+                  placeholder="Saisissez votre réponse ici..."
                   rows={5}
                 ></textarea>
                 
                 <div className="response-actions">
                   {responseSuccess && (
-                    <span className="response-success">Response submitted successfully!</span>
+                    <span className="response-success">Réponse soumise avec succès!</span>
                   )}
                   <button 
                     className="submit-button" 
                     onClick={submitResponse}
                     disabled={!response.trim()}
                   >
-                    {selectedReport.reponse ? 'Update Response' : 'Submit Response'}
+                    {selectedReport.reponse ? 'Mettre à jour la réponse' : 'Soumettre la réponse'}
                   </button>
                 </div>
               </div>
             </>
           ) : (
             <div className="no-report-selected">
-              <p>Please select a report from the list to view details and respond.</p>
+              <p>Veuillez sélectionner un rapport dans la liste pour voir les détails et répondre.</p>
             </div>
           )}
         </div>

@@ -152,7 +152,7 @@ const AdminDashboard = ({ onLogout }) => {
     );  };
   
   if (!user || loading) {
-    return <div className="loading">Loading...</div>;
+    return <div className="loading">Chargement...</div>;
   }
 
   return (
