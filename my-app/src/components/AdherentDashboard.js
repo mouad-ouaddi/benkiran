@@ -54,6 +54,11 @@ const AdherentDashboard = ({ onLogout }) => {
     message: ''
   });
 
+  const [modifyForm, setModifyForm] = useState({
+    newCourse: '',
+    reason: ''
+  });
+
   useEffect(() => {
     const userData = localStorage.getItem('user');
     if (userData) {
@@ -102,6 +107,7 @@ const AdherentDashboard = ({ onLogout }) => {
     const reservation = reservations.find(r => r.id === reservationId);
     
     if (action === 'modify') {
+      console.log('Modification clicked for reservation:', reservation); // Debug
       setSelectedCourse(reservation);
       setModalType('modify-reservation');
       setShowModal(true);
@@ -145,6 +151,47 @@ const AdherentDashboard = ({ onLogout }) => {
     }
   };
 
+  // Modify Reservation Function
+  const handleModifyReservation = () => {
+    if (!modifyForm.newCourse) {
+      alert('Veuillez sélectionner un nouveau créneau');
+      return;
+    }
+
+    if (selectedCourse) {
+      // Parse the new course selection
+      const courseOptions = {
+        'yoga-23-04': { type: 'Yoga', date: '23/04', time: '18h30', coach: 'Claire Martin' },
+        'cardio-24-04': { type: 'Cardio', date: '24/04', time: '10h00', coach: 'Marc Dubois' },
+        'pilates-25-04': { type: 'Pilates', date: '25/04', time: '19h00', coach: 'Sophie Laurent' },
+        'crossfit-26-04': { type: 'CrossFit', date: '26/04', time: '07h00', coach: 'Thomas Bernard' }
+      };
+
+      const newCourseDetails = courseOptions[modifyForm.newCourse];
+      
+      if (newCourseDetails) {
+        // Update the reservation
+        setReservations(reservations.map(reservation => 
+          reservation.id === selectedCourse.id 
+            ? { 
+                ...reservation, 
+                type: newCourseDetails.type,
+                date: newCourseDetails.date,
+                time: newCourseDetails.time,
+                coach: newCourseDetails.coach,
+                statut: 'Confirmé'
+              }
+            : reservation
+        ));
+
+        alert('Réservation modifiée avec succès!');
+        setShowModal(false);
+        setSelectedCourse(null);
+        setModifyForm({ newCourse: '', reason: '' });
+      }
+    }
+  };
+
   // Contact Coach Function
   const handleContactSubmit = () => {
     if (contactForm.coach && contactForm.subject && contactForm.message) {
@@ -165,6 +212,33 @@ const AdherentDashboard = ({ onLogout }) => {
       if (window.confirm('Êtes-vous sûr de vouloir annuler votre abonnement ?')) {
         alert('Abonnement annulé. Vous recevrez un email de confirmation.');
       }
+    }
+  };
+
+  // NEW: Subscription Change Function
+  const handleSubscriptionChange = (newPlan) => {
+    const planDetails = {
+      'basic': { name: 'Basic', price: '29.99€/mois' },
+      'premium': { name: 'Premium', price: '59.99€/mois' },
+      'vip': { name: 'VIP', price: '89.99€/mois' }
+    };
+
+    if (window.confirm(`Êtes-vous sûr de vouloir changer votre abonnement vers ${planDetails[newPlan].name} (${planDetails[newPlan].price}) ?`)) {
+      // Update user subscription
+      setUser(prevUser => ({
+        ...prevUser,
+        abonnement: planDetails[newPlan].name
+      }));
+      
+      // Update localStorage to persist the change
+      const updatedUser = {
+        ...user,
+        abonnement: planDetails[newPlan].name
+      };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
+      alert(`Abonnement modifié vers ${planDetails[newPlan].name} avec succès!`);
+      setShowModal(false);
     }
   };
 
@@ -651,6 +725,70 @@ const AdherentDashboard = ({ onLogout }) => {
         <div style={modalStyles.overlay} onClick={() => setShowModal(false)}>
           <div style={modalStyles.modal} onClick={(e) => e.stopPropagation()}>
             
+            {/* Modify Reservation Modal */}
+            {modalType === 'modify-reservation' && selectedCourse && (
+              <>
+                <div style={modalStyles.header}>
+                  <h2>Modifier la réservation</h2>
+                  <button onClick={() => setShowModal(false)} style={modalStyles.closeBtn}>×</button>
+                </div>
+                <div style={modalStyles.body}>
+                  <div style={modalStyles.field}>
+                    <label style={modalStyles.label}>Cours actuel:</label>
+                    <div style={modalStyles.currentReservation}>
+                      <p><strong>{selectedCourse.type}</strong></p>
+                      <p>{selectedCourse.date} à {selectedCourse.time}</p>
+                      <p>Coach: {selectedCourse.coach}</p>
+                      <p>Statut: {selectedCourse.statut}</p>
+                    </div>
+                  </div>
+                  
+                  <div style={modalStyles.field}>
+                    <label style={modalStyles.label}>Nouveau créneau disponible:</label>
+                    <select 
+                      style={modalStyles.input}
+                      value={modifyForm.newCourse}
+                      onChange={(e) => setModifyForm({...modifyForm, newCourse: e.target.value})}
+                    >
+                      <option value="">Sélectionner un nouveau créneau</option>
+                      <option value="yoga-23-04">Yoga - 23/04 à 18h30 - Claire Martin</option>
+                      <option value="cardio-24-04">Cardio - 24/04 à 10h00 - Marc Dubois</option>
+                      <option value="pilates-25-04">Pilates - 25/04 à 19h00 - Sophie Laurent</option>
+                      <option value="crossfit-26-04">CrossFit - 26/04 à 07h00 - Thomas Bernard</option>
+                    </select>
+                  </div>
+                  
+                  <div style={modalStyles.field}>
+                    <label style={modalStyles.label}>Raison du changement (optionnel):</label>
+                    <textarea
+                      style={{...modalStyles.input, height: '80px'}}
+                      placeholder="Pourquoi souhaitez-vous modifier cette réservation ?"
+                      value={modifyForm.reason}
+                      onChange={(e) => setModifyForm({...modifyForm, reason: e.target.value})}
+                    />
+                  </div>
+                </div>
+                <div style={modalStyles.footer}>
+                  <button 
+                    onClick={handleModifyReservation}
+                    style={modalStyles.confirmBtn}
+                  >
+                    Confirmer la modification
+                  </button>
+                  <button 
+                    onClick={() => {
+                      setShowModal(false);
+                      setSelectedCourse(null);
+                      setModifyForm({ newCourse: '', reason: '' });
+                    }} 
+                    style={modalStyles.cancelBtn}
+                  >
+                    Annuler
+                  </button>
+                </div>
+              </>
+            )}
+
             {/* Book Course Modal */}
             {modalType === 'book-course' && selectedCourse && (
               <>
@@ -729,7 +867,7 @@ const AdherentDashboard = ({ onLogout }) => {
               </>
             )}
 
-            {/* Modify Subscription Modal */}
+            {/* FIXED: Modify Subscription Modal */}
             {modalType === 'modify-subscription' && (
               <>
                 <div style={modalStyles.header}>
@@ -741,75 +879,41 @@ const AdherentDashboard = ({ onLogout }) => {
                     <div style={modalStyles.subscriptionOption}>
                       <h4>Basic - 29.99€/mois</h4>
                       <p>Accès aux cours de base</p>
-                      <button style={modalStyles.selectBtn}>Sélectionner</button>
+                      <button 
+                        style={user.abonnement === 'Basic' ? modalStyles.currentBtn : modalStyles.selectBtn}
+                        onClick={() => user.abonnement !== 'Basic' && handleSubscriptionChange('basic')}
+                        disabled={user.abonnement === 'Basic'}
+                      >
+                        {user.abonnement === 'Basic' ? 'Actuel' : 'Sélectionner'}
+                      </button>
                     </div>
                     <div style={modalStyles.subscriptionOption}>
-                      <h4>Premium - 59.99€/mois (Actuel)</h4>
+                      <h4>Premium - 59.99€/mois</h4>
                       <p>Accès à tous les cours + piscine</p>
-                      <button style={modalStyles.currentBtn}>Actuel</button>
+                      <button 
+                        style={user.abonnement === 'Premium' ? modalStyles.currentBtn : modalStyles.selectBtn}
+                        onClick={() => user.abonnement !== 'Premium' && handleSubscriptionChange('premium')}
+                        disabled={user.abonnement === 'Premium'}
+                      >
+                        {user.abonnement === 'Premium' ? 'Actuel' : 'Sélectionner'}
+                      </button>
                     </div>
                     <div style={modalStyles.subscriptionOption}>
                       <h4>VIP - 89.99€/mois</h4>
                       <p>Accès illimité + coach personnel</p>
-                      <button style={modalStyles.selectBtn}>Sélectionner</button>
+                      <button 
+                        style={user.abonnement === 'VIP' ? modalStyles.currentBtn : modalStyles.selectBtn}
+                        onClick={() => user.abonnement !== 'VIP' && handleSubscriptionChange('vip')}
+                        disabled={user.abonnement === 'VIP'}
+                      >
+                        {user.abonnement === 'VIP' ? 'Actuel' : 'Sélectionner'}
+                      </button>
                     </div>
                   </div>
                 </div>
                 <div style={modalStyles.footer}>
                   <button onClick={() => setShowModal(false)} style={modalStyles.cancelBtn}>
                     Fermer
-                  </button>
-                </div>
-              </>
-            )}
-
-            {/* Modify Reservation Modal */}
-            {modalType === 'modify-reservation' && selectedCourse && (
-              <>
-                <div style={modalStyles.header}>
-                  <h2>Modifier la réservation</h2>
-                  <button onClick={() => setShowModal(false)} style={modalStyles.closeBtn}>×</button>
-                </div>
-                <div style={modalStyles.body}>
-                  <div style={modalStyles.field}>
-                    <label style={modalStyles.label}>Cours actuel:</label>
-                    <div style={modalStyles.currentReservation}>
-                      <p><strong>{selectedCourse.type}</strong></p>
-                      <p>{selectedCourse.date} à {selectedCourse.time}</p>
-                      <p>Coach: {selectedCourse.coach}</p>
-                    </div>
-                  </div>
-                  
-                  <div style={modalStyles.field}>
-                    <label style={modalStyles.label}>Nouveau créneau disponible:</label>
-                    <select style={modalStyles.input}>
-                      <option value="">Sélectionner un nouveau créneau</option>
-                      <option value="yoga-23-04">Yoga - 23/04 à 18h30 - Claire Martin</option>
-                      <option value="cardio-24-04">Cardio - 24/04 à 10h00 - Marc Dubois</option>
-                      <option value="pilates-25-04">Pilates - 25/04 à 19h00 - Sophie Laurent</option>
-                    </select>
-                  </div>
-                  
-                  <div style={modalStyles.field}>
-                    <label style={modalStyles.label}>Raison du changement (optionnel):</label>
-                    <textarea
-                      style={{...modalStyles.input, height: '80px'}}
-                      placeholder="Pourquoi souhaitez-vous modifier cette réservation ?"
-                    />
-                  </div>
-                </div>
-                <div style={modalStyles.footer}>
-                  <button 
-                    onClick={() => {
-                      alert('Réservation modifiée avec succès!');
-                      setShowModal(false);
-                    }} 
-                    style={modalStyles.confirmBtn}
-                  >
-                    Confirmer la modification
-                  </button>
-                  <button onClick={() => setShowModal(false)} style={modalStyles.cancelBtn}>
-                    Annuler
                   </button>
                 </div>
               </>
